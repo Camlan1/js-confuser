@@ -1,6 +1,6 @@
 {
   "name": "js-confuser",
-  "version": "2.1.2",
+  "version": "2.1.2-camlan.0",
   "description": "JavaScript Obfuscation Tool.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
