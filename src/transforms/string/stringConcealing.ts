@@ -63,6 +63,7 @@ export default ({ Plugin }: PluginArg): PluginObject => {
     }
   >();
   const stringsName = me.getPlaceholder() + "_array";
+  const stringsCache = me.getPlaceholder() + "_cache";
   let stringsValue = "";
 
   let encodingImplementations: { [identity: string]: CustomStringEncoding } =
@@ -290,6 +291,14 @@ export default ({ Plugin }: PluginArg): PluginObject => {
             }),
           );
 
+          // Create the string cache
+          prependProgram(
+            programPath,
+            new Template(`
+            var {stringsCache} = {};
+            `).single({ stringsCache })
+          );
+
           for (var block of blocks) {
             const { encodingImplementation, fnName } = (
               block.node as NodeStringConcealing
@@ -310,7 +319,11 @@ export default ({ Plugin }: PluginArg): PluginObject => {
             // The main function to get the string value
             const retrieveFunctionDeclaration = new Template(`
               function ${fnName}(start, length) {
-                return ${decodeFnName}(${stringsName}["slice"](start, start+length));
+                var key = start + '-' + length
+                if (typeof ${stringsCache}[key] === 'undefined') {
+                  return ${stringsCache}[key] = ${decodeFnName}(${stringsName}["slice"](start, start+length));
+                }
+                return ${stringsCache}[key];
               }
             `)
               .addSymbols(NO_REMOVE)
